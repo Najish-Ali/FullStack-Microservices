@@ -1,95 +1,46 @@
-Multi-Tenant SaaS Architecture with Schema-Based Database Isolation
-===================================================================
+**Project: Multi-Service Application with API Gateway, UI, and API**
+====================================================================
 
-Overview
---------
+This project is a multi-service application that includes:
 
-This project implements a **multi-tenant SaaS architecture** where each client gets a separate database schema. The application dynamically maps subdomains to specific schemas to ensure **data isolation and privacy**. The system is deployed on **AWS ECS**, and **GitHub Actions** handles CI/CD automation.
+-   **API Gateway**: Built with FastAPI, handles user registration, pipeline triggering, and rollback.
 
-Architecture
+-   **UI Application**: Built with Node.js and Express, provides a user interface for registration.
+
+-   **API Application**: Built with Node.js and Express, serves as a backend service.
+
+-   **PostgreSQL Database**: Used for storing user information and schema data.
+
+The application is containerized using Docker and can be deployed locally or on a cloud platform.
+
+**Features**
 ------------
 
-### Components:
+-   **User Registration**: Users can register via the UI, and a new schema is created in the database.
 
-1.  **Frontend (UI)** -- Web application interacting with API.
-2.  **API Layer** -- Backend service managing requests, user authentication, and schema switching.
-3.  **Database (PostgreSQL)** -- Single database with multiple schemas for tenant isolation.
-4.  **Subdomain Routing** -- Each client has a unique subdomain (`clientA.example.com`, `clientB.example.com`), which maps to a schema.
-5.  **CI/CD Pipeline (GitHub Actions + AWS ECS)** -- Automates deployment, database migrations, and scaling.
+-   **Pipeline Automation**: Trigger CI/CD pipelines for UI, API, and database services.
 
-### Flow:
+-   **Rollback Mechanism**: Rollback changes in case of pipeline failures.
 
-1.  **User Request:** UI sends a request to API.
-2.  **Subdomain Detection:** Middleware extracts the subdomain.
-3.  **Schema Switching:** API dynamically connects to the relevant schema.
-4.  **Data Privacy Ensured:** Each client can only access their own schema.
-5.  **Deployment Automation:** CI/CD pipeline ensures continuous integration and delivery.
+-   **Containerized Services**: All services are Dockerized for easy deployment.
 
-### Problem Statement:
+-   **CI/CD Integration**: GitHub Actions workflows for automated testing and deployment.
 
-Design and implement CI/CD pipelines for a web service that consists of three independent components — UI, APIs, and Backend DB. The pipelines should allow:
+* * * * *
 
-- Deployment of the entire service or individual components as per requirement.
-- Support for both default domain and user-specific subdomains.
-- APIs to remain common across all deployments (packetized architecture).
-- Single Database with multiple schemas, where each schema represents a different user.
-- Automation of schema creation and dynamic subdomain configuration.
+**Prerequisites**
+-----------------
 
-### Understanding:
+Before running the project, ensure you have the following installed:
 
-1. The service consists of three layers:
+-   [Docker](https://docs.docker.com/get-docker/)
 
-- UI: Frontend layout that interacts with APIs.
-- API: Backend APIs that perform business logic, which remains the same across all users.
-- DB: A single database with multiple schemas where each schema is mapped to a unique user.
+-   [Docker Compose](https://docs.docker.com/compose/install/)
 
-2. Deployment Requirements:
+-   [Node.js](https://nodejs.org/) (v16 or higher)
 
-- Each component should have its own CI/CD pipeline.
-- Pipelines should be capable of running independently or combined.
-- Subdomains should be dynamically mapped based on user preferences.
-- DB schemas should be automatically created for new users during onboarding.
+-   [Python](https://www.python.org/) (v3.9 or higher)
 
-3. Manual Work Identified:
+-   [PostgreSQL](https://www.postgresql.org/) (or access to an AWS RDS PostgreSQL instance)
 
-- DNS Configuration for custom subdomains.
-- Initial Secrets setup.
-- Mapping user subdomains with API endpoints.
-- DB schema creation on user onboarding.
-
-### Approach to Solve It:
-
-1. Separate CI/CD Pipelines:
-
-- Create three independent pipelines for UI, API, and DB.
-- Use GitHub Actions or Jenkins for pipeline automation.
-
-2. Automating DB Schema Creation:
-
-- Implement an API or script that automatically creates user schemas during onboarding.
-- Use Alembic (Python) or Liquibase for DB migrations.
-
-3. Subdomain Automation:
-
-- Use cloud provider APIs like AWS Route 53 or Cloudflare to automate DNS record creation.
-- Add custom pipeline steps for subdomain registration.
-
-4. Secrets Management:
-
-- Store sensitive information in Vault or AWS Secrets Manager.
-- Automatically inject secrets during deployments.
-
-5. API Gateway:
-
-- Develop an API Gateway that handles subdomain registration, DB schema creation, and pipeline triggers automatically.
-- The API Gateway will expose endpoints like:
-
--- /register-user: Accepts user data, subdomain, and schema name.
--- /trigger-pipeline: Triggers the required CI/CD pipelines.
--- /create-schema: Automates DB schema creation.
-
-6. Pipeline YAMLs:
-
-- Write separate GitHub Actions YAML files for UI, API, and DB pipelines.
-- Design combined pipelines that sequentially trigger individual pipelines.
-- Use parameters to dynamically configure subdomains and secrets during pipeline runs.
+-
