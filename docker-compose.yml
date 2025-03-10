@@ -1,25 +1,21 @@
 version: '3.8'
 
 services:
-  # API Gateway Service
   api-gateway:
     build: ./api-gateway
-    container_name: api-gateway
     ports:
       - "8000:8000"
     environment:
-      - DB_HOST=postgres
+      - DB_HOST=db
       - DB_NAME=mydatabase
       - DB_USER=myuser
       - DB_PASSWORD=mypassword
       - JWT_SECRET=supersecretkey
     depends_on:
-      - postgres
+      - db
 
-  # UI Application Service
   ui-app:
     build: ./ui-app
-    container_name: ui-app
     ports:
       - "3000:3000"
     environment:
@@ -27,24 +23,20 @@ services:
     depends_on:
       - api-gateway
 
-  # API Application Service
   api-app:
     build: ./api-app
-    container_name: api-app
     ports:
       - "4000:4000"
     environment:
-      - DB_HOST=postgres
+      - DB_HOST=db
       - DB_NAME=mydatabase
       - DB_USER=myuser
       - DB_PASSWORD=mypassword
     depends_on:
-      - postgres
+      - db
 
-  # PostgreSQL Database Service
-  postgres:
+  db:
     image: postgres:13
-    container_name: postgres
     environment:
       - POSTGRES_DB=mydatabase
       - POSTGRES_USER=myuser
@@ -54,6 +46,5 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
-# Volumes for persistent data storage
 volumes:
   postgres_data:

@@ -1,0 +1,39 @@
+name: DB Pipeline
+on:
+  repository_dispatch:
+    types: [create-schema]
+jobs:
+  setup_db:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Compose
+        run: |
+          docker-compose -f docker-compose.yml up -d db
+
+      - name: Fetch Secrets
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: echo "Secrets fetched successfully."
+
+      - name: Create Schema
+        run: |
+          docker-compose exec db psql -U myuser -d mydatabase -c "CREATE SCHEMA IF NOT EXISTS ${{ github.event.client_payload.subdomain }};"
+
+      - name: Run Migrations
+        run: |
+          docker-compose exec db psql -U myuser -d mydatabase -c "SET search_path TO ${{ github.event.client_payload.subdomain }}; CREATE TABLE IF NOT EXISTS users (id SERIAL PRIMARY KEY, name VARCHAR(255), email VARCHAR(255) UNIQUE);"
+
+      - name: Validate Database
+        run: |
+          docker-compose exec db psql -U myuser -d mydatabase -c "SELECT schema_name FROM information_schema.schemata WHERE schema_name = '${{ github.event.client_payload.subdomain }}';"
+
+      - name: Rollback on Failure
+        if: failure()
+        run: |
+          curl -X POST http://api-gateway:8000/rollback -H "Content-Type: application/json" -d '{"service": "db", "version": "latest"}'

@@ -1,0 +1,26 @@
+name: API Pipeline
+on:
+  workflow_dispatch:
+jobs:
+  build-api:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Compose
+        run: |
+          docker-compose -f docker-compose.yml build api-app
+          docker-compose -f docker-compose.yml up -d api-app
+
+      - name: Trigger API Gateway
+        run: |
+          curl -X POST http://api-gateway:8000/trigger-pipeline -H "Content-Type: application/json" -d '{"service": "api", "version": "latest"}'
+
+      - name: Health Check
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://api-app:4000/health)
+          if [ "$STATUS" != "200" ]; then
+            echo "API Health Check Failed"
+            exit 1
+          fi
