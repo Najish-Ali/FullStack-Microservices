@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+jwt
+requests
+certifi
+psycopg2
+os
