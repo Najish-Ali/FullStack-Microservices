@@ -1,6 +1,7 @@
 version: '3.8'
 
 services:
+# For API-Getway....
   api-gateway:
     build: ./api-gateway
     ports:
@@ -14,6 +15,7 @@ services:
     depends_on:
       - db
 
+# For UI-APP [ FrontEnd ] ...
   ui-app:
     build: ./ui-app
     ports:
@@ -35,6 +37,7 @@ services:
     depends_on:
       - db
 
+# For Database [ DB ] ...
   db:
     image: postgres:13
     environment:
